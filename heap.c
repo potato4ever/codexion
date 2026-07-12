@@ -89,3 +89,45 @@ t_request	*heap_pop(t_sim *sim, t_heap *heap)
 	}
 	return (top);
 }
+
+int	heap_remove(t_sim *sim, t_heap *heap, t_request *request)
+{
+	int	index;
+	int	parent;
+	int	child;
+
+	index = 0;
+	while (index < heap->len && heap->items[index] != request)
+		index++;
+	if (index == heap->len)
+		return (0);
+	heap->len--;
+	if (index == heap->len)
+		return (1);
+	heap->items[index] = heap->items[heap->len];
+	parent = (index - 1) / 2;
+	if (index > 0 && request_before(sim, heap->items[index], heap->items[parent]))
+	{
+		while (index > 0 && request_before(sim, heap->items[index],
+				heap->items[(index - 1) / 2]))
+		{
+			swap_request(&heap->items[index], &heap->items[(index - 1) / 2]);
+			index = (index - 1) / 2;
+		}
+		return (1);
+	}
+	while (1)
+	{
+		child = index * 2 + 1;
+		if (child >= heap->len)
+			break ;
+		if (child + 1 < heap->len && request_before(sim,
+				heap->items[child + 1], heap->items[child]))
+			child++;
+		if (!request_before(sim, heap->items[child], heap->items[index]))
+			break ;
+		swap_request(&heap->items[child], &heap->items[index]);
+		index = child;
+	}
+	return (1);
+}

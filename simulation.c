@@ -46,9 +46,7 @@ static int	pair_ready_locked(t_sim *sim, t_coder *coder, long now)
 	second = &sim->dongles[right];
 	lock_dongle(first);
 	lock_dongle(second);
-	ready = (heap_peek(&first->queue) == &coder->request
-			&& heap_peek(&second->queue) == &coder->request && !first->busy
-			&& !second->busy && first->cooldown_until <= now
+	ready = (!first->busy && !second->busy && first->cooldown_until <= now
 			&& second->cooldown_until <= now);
 	unlock_dongle(second);
 	unlock_dongle(first);
@@ -68,8 +66,8 @@ static void	grant_pair_locked(t_sim *sim, t_coder *coder, long now)
 	second = &sim->dongles[right];
 	lock_dongle(first);
 	lock_dongle(second);
-	heap_pop(sim, &first->queue);
-	heap_pop(sim, &second->queue);
+	heap_remove(sim, &first->queue, &coder->request);
+	heap_remove(sim, &second->queue, &coder->request);
 	first->busy = 1;
 	second->busy = 1;
 	unlock_dongle(second);
@@ -88,22 +86,24 @@ void	try_schedule_locked(t_sim *sim)
 
 	if (sim->stopped)
 		return ;
-	now = now_ms();
-	winner = NULL;
-	i = 0;
-	while (i < sim->config.count)
+	while (1)
 	{
-		if (sim->coders[i].request.queued && pair_ready_locked(sim,
-				&sim->coders[i], now) && (!winner || request_before(sim,
-				&sim->coders[i].request, &winner->request)))
-			winner = &sim->coders[i];
-		i++;
-	}
-	if (winner)
-	{
+		now = now_ms();
+		winner = NULL;
+		i = 0;
+		while (i < sim->config.count)
+		{
+			if (sim->coders[i].request.queued && pair_ready_locked(sim,
+					&sim->coders[i], now) && (!winner || request_before(sim,
+					&sim->coders[i].request, &winner->request)))
+				winner = &sim->coders[i];
+			i++;
+		}
+		if (!winner)
+			break ;
 		grant_pair_locked(sim, winner, now);
-		pthread_cond_broadcast(&sim->event);
 	}
+	pthread_cond_broadcast(&sim->event);
 }
 
 void	request_pair_locked(t_coder *coder)
@@ -115,21 +115,30 @@ void	request_pair_locked(t_coder *coder)
 	t_dongle	*second;
 
 	sim = coder->sim;
-	if (sim->config.count == 1)
-		return ;
-	left = left_dongle(coder->id);
-	right = right_dongle(sim, coder->id);
-	first = &sim->dongles[left];
-	second = &sim->dongles[right];
-	coder->request.sequence = sim->next_sequence++;
-	coder->request.deadline = coder->last_start + sim->config.die_ms;
-	coder->request.queued = 1;
-	lock_dongle(first);
-	lock_dongle(second);
-	heap_push(sim, &first->queue, &coder->request);
-	heap_push(sim, &second->queue, &coder->request);
-	unlock_dongle(second);
-	unlock_dongle(first);
+	if (sim->config.count > 1)
+	{
+		left = left_dongle(coder->id);
+		right = right_dongle(sim, coder->id);
+		first = &sim->dongles[left];
+		second = &sim->dongles[right];
+		coder->request.sequence = sim->next_sequence++;
+		coder->request.deadline = coder->last_start + sim->config.die_ms;
+		coder->request.queued = 1;
+		lock_dongle(first);
+		lock_dongle(second);
+		heap_push(sim, &first->queue, &coder->request);
+		heap_push(sim, &second->queue, &coder->request);
+		unlock_dongle(second);
+		unlock_dongle(first);
+	}
+	if (!sim->initial_requests_ready)
+	{
+		sim->initial_requests++;
+		if (sim->initial_requests == sim->config.count)
+			sim->initial_requests_ready = 1;
+		else
+			return ;
+	}
 	try_schedule_locked(sim);
 }
 

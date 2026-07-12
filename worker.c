@@ -48,23 +48,37 @@ static int	wait_until_event(t_coder *coder)
 	return (!sim->stopped && coder->request.owns_pair);
 }
 
+static int	sleep_until(t_coder *coder, long end)
+{
+	t_sim			*sim;
+	struct timespec	deadline;
+	int			finished;
+
+	sim = coder->sim;
+	pthread_mutex_lock(&sim->state_mutex);
+	while (!sim->stopped && now_ms() < end)
+	{
+		ms_to_timespec(end, &deadline);
+		pthread_cond_timedwait(&sim->event, &sim->state_mutex, &deadline);
+	}
+	finished = (!sim->stopped && now_ms() >= end);
+	pthread_mutex_unlock(&sim->state_mutex);
+	return (finished);
+}
+
 static int	interruptible_sleep(t_coder *coder, long duration)
 {
-	long	end;
-	long	remaining;
+	return (sleep_until(coder, now_ms() + duration));
+}
 
-	end = now_ms() + duration;
-	while (now_ms() < end)
-	{
-		if (simulation_stopped(coder->sim))
-			return (0);
-		remaining = end - now_ms();
-		if (remaining > 1)
-			usleep(1000);
-		else if (remaining > 0)
-			usleep((useconds_t)(remaining * 1000));
-	}
-	return (!simulation_stopped(coder->sim));
+static int	finish_compile_at_grant_time(t_coder *coder)
+{
+	long	end;
+
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	end = coder->last_start + coder->sim->config.compile_ms;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	return (sleep_until(coder, end));
 }
 
 static int	all_finished_locked(t_sim *sim)
@@ -131,7 +145,7 @@ void	*worker_main(void *arg)
 		log_state(coder, "has taken a dongle");
 		log_state(coder, "has taken a dongle");
 		log_state(coder, "is compiling");
-		if (!interruptible_sleep(coder, sim->config.compile_ms))
+		if (!finish_compile_at_grant_time(coder))
 			break ;
 		if (!finish_compile(coder))
 			break ;

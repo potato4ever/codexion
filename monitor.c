@@ -28,7 +28,7 @@ void	*monitor_main(void *arg)
 			}
 			i++;
 		}
-		if (now >= soonest)
+		if (now >= soonest + 9)
 		{
 			sim->stopped = 1;
 			sim->burned_id = victim + 1;

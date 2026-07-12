@@ -75,6 +75,8 @@ typedef struct s_sim
 	long			start_ms;
 	unsigned long	next_sequence;
 	int			start_ready;
+	int			initial_requests;
+	int			initial_requests_ready;
 	int			stopped;
 	int			burned_id;
 }t_sim;
@@ -87,6 +89,7 @@ void		heap_destroy(t_heap *heap);
 int		heap_push(t_sim *sim, t_heap *heap, t_request *request);
 t_request	*heap_peek(t_heap *heap);
 t_request	*heap_pop(t_sim *sim, t_heap *heap);
+int		heap_remove(t_sim *sim, t_heap *heap, t_request *request);
 int		request_before(t_sim *sim, t_request *a, t_request *b);
 int		simulation_init(t_sim *sim, t_config *config);
 void		simulation_destroy(t_sim *sim);
