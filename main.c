@@ -34,7 +34,10 @@ int	main(int argc, char **argv)
 	if (!parse_config(argc, argv, &config))
 		return (fprintf(stderr, "Error: invalid arguments\n"), 1);
 	if (!simulation_init(&sim, &config))
+	{
+    simulation_destroy(&sim);
 		return (fprintf(stderr, "Error: initialization failed\n"), 1);
+	}
 	if (config.quota == 0)
 		return (simulation_destroy(&sim), 0);
 	i = 0;
@@ -48,6 +51,7 @@ int	main(int argc, char **argv)
 		}
 		i++;
 	}
+	
 	if (i == config.count && pthread_create(&sim.monitor, NULL,
 			&monitor_main, &sim) == 0)
 	{

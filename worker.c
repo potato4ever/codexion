@@ -132,6 +132,9 @@ void	*worker_main(void *arg)
 	while (!sim->start_ready && !sim->stopped)
 		pthread_cond_wait(&sim->event, &sim->state_mutex);
 	pthread_mutex_unlock(&sim->state_mutex);
+  if (coder->id % 2 == 0){
+    usleep(2000);
+  }
 	while (!simulation_stopped(sim))
 	{
 		pthread_mutex_lock(&sim->state_mutex);

@@ -22,6 +22,34 @@ static void	unlock_dongle(t_dongle *dongle)
 	pthread_mutex_unlock(&dongle->mutex);
 }
 
+static void	lock_pair(t_sim *sim, int left, int right)
+{
+	if (left < right)
+	{
+		lock_dongle(&sim->dongles[left]);
+		lock_dongle(&sim->dongles[right]);
+	}
+	else
+	{
+		lock_dongle(&sim->dongles[right]);
+		lock_dongle(&sim->dongles[left]);
+	}
+}
+
+static void	unlock_pair(t_sim *sim, int left, int right)
+{
+	if (left < right)
+	{
+		unlock_dongle(&sim->dongles[right]);
+		unlock_dongle(&sim->dongles[left]);
+	}
+	else
+	{
+		unlock_dongle(&sim->dongles[left]);
+		unlock_dongle(&sim->dongles[right]);
+	}
+}
+
 void	print_event_locked(t_sim *sim, int id, const char *event)
 {
 	long	stamp;
@@ -44,12 +72,10 @@ static int	pair_ready_locked(t_sim *sim, t_coder *coder, long now)
 	right = right_dongle(sim, coder->id);
 	first = &sim->dongles[left];
 	second = &sim->dongles[right];
-	lock_dongle(first);
-	lock_dongle(second);
+	lock_pair(sim, left, right);
 	ready = (!first->busy && !second->busy && first->cooldown_until <= now
 			&& second->cooldown_until <= now);
-	unlock_dongle(second);
-	unlock_dongle(first);
+	unlock_pair(sim, left, right);
 	return (ready);
 }
 
@@ -64,14 +90,12 @@ static void	grant_pair_locked(t_sim *sim, t_coder *coder, long now)
 	right = right_dongle(sim, coder->id);
 	first = &sim->dongles[left];
 	second = &sim->dongles[right];
-	lock_dongle(first);
-	lock_dongle(second);
+	lock_pair(sim, left, right);
 	heap_remove(sim, &first->queue, &coder->request);
 	heap_remove(sim, &second->queue, &coder->request);
 	first->busy = 1;
 	second->busy = 1;
-	unlock_dongle(second);
-	unlock_dongle(first);
+	unlock_pair(sim, left, right);
 	coder->request.queued = 0;
 	coder->request.owns_pair = 1;
 	coder->last_start = now;
@@ -124,12 +148,10 @@ void	request_pair_locked(t_coder *coder)
 		coder->request.sequence = sim->next_sequence++;
 		coder->request.deadline = coder->last_start + sim->config.die_ms;
 		coder->request.queued = 1;
-		lock_dongle(first);
-		lock_dongle(second);
+		lock_pair(sim, left, right);
 		heap_push(sim, &first->queue, &coder->request);
 		heap_push(sim, &second->queue, &coder->request);
-		unlock_dongle(second);
-		unlock_dongle(first);
+		unlock_pair(sim, left, right);
 	}
 	if (!sim->initial_requests_ready)
 	{
@@ -159,14 +181,12 @@ void	release_pair_locked(t_coder *coder)
 	first = &sim->dongles[left];
 	second = &sim->dongles[right];
 	now = now_ms();
-	lock_dongle(first);
-	lock_dongle(second);
+	lock_pair(sim, left, right);
 	first->busy = 0;
 	second->busy = 0;
 	first->cooldown_until = now + sim->config.cooldown_ms;
 	second->cooldown_until = now + sim->config.cooldown_ms;
-	unlock_dongle(second);
-	unlock_dongle(first);
+	unlock_pair(sim, left, right);
 	coder->request.owns_pair = 0;
 	pthread_cond_broadcast(&sim->event);
 	try_schedule_locked(sim);
@@ -194,7 +214,12 @@ int	simulation_init(t_sim *sim, t_config *config)
 	memset(sim, 0, sizeof(*sim));
 	sim->config = *config;
 	sim->dongles = malloc(sizeof(*sim->dongles) * (size_t)config->count);
+	if (!sim->dongles)
+		return (0);
 	sim->coders = malloc(sizeof(*sim->coders) * (size_t)config->count);
+	if (!sim->coders)
+		return (0);
+  memset(sim->dongles, 0, sizeof(*sim->dongles) * (size_t)config->count);
 	if (!sim->dongles || !sim->coders
 		|| pthread_mutex_init(&sim->state_mutex, NULL)
 		|| pthread_mutex_init(&sim->print_mutex, NULL)

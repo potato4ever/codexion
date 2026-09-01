@@ -9,7 +9,7 @@ static int	parse_number(const char *text, long *value)
 	result = 0;
 	while (*text)
 	{
-		if (*text < '0' || *text > '9' || result > (LONG_MAX - (*text - '0')) / 10)
+		if ((*text < '0') || (*text > '9') || (result > (LONG_MAX - (*text - '0')) / 10))
 			return (0);
 		result = result * 10 + (*text - '0');
 		text++;
