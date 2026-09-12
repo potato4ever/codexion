@@ -19,7 +19,27 @@ questions:
   problem if there is garbage value and why don't 
   using it cause valgrind to complains
 
+# IMPORTANT:
+- any functions used should be understood 
+- the reason of multiple mutexes 
+- why try_schedule_locked called in different places taking in mind that only one thread is gonna served at a time
+- why using some stuffs that have vague purpose in the project like heap_remove or even the part of sim->initial_requests_ready
+- what happens in case of failure in any part of code
+- edit instead of coder_id 
+- can you create the same thread multiple times
 
 
 
+# TASKS:
+reread and understand the logic in :
+- the success case 
+- in the failure case
+- in middle failure
+handle the parser
+check valgrind and helgrind 
+read the subject and the correction sheet
+should i handle spaces like atoi "+1    1 1 " = 1 ?
+should replace the config names
+why removing struct s_sim from line 54 not gonna change anything
+solve norminette and add headers
 

@@ -4,9 +4,7 @@ int	request_before(t_sim *sim, t_request *a, t_request *b)
 {
 	if (sim->config.policy == POLICY_EDF && a->deadline != b->deadline)
 		return (a->deadline < b->deadline);
-	if (a->sequence != b->sequence)
-		return (a->sequence < b->sequence);
-	return (a->coder_id < b->coder_id);
+  return (a->sequence < b->sequence);
 }
 
 static void	swap_request(t_request **a, t_request **b)

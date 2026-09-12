@@ -32,14 +32,21 @@ int	main(int argc, char **argv)
 	int		i;
 
 	if (!parse_config(argc, argv, &config))
-		return (fprintf(stderr, "Error: invalid arguments\n"), 1);
+  {
+    fprintf(stderr, "Error: invalid arguments\n");
+		return (1);
+  }
 	if (!simulation_init(&sim, &config))
 	{
     simulation_destroy(&sim);
-		return (fprintf(stderr, "Error: initialization failed\n"), 1);
+    fprintf(stderr, "Error: initialization failed\n");
+		return (1);
 	}
 	if (config.quota == 0)
-		return (simulation_destroy(&sim), 0);
+  {
+    simulation_destroy(&sim);
+		return (0);
+  }
 	i = 0;
 	while (i < config.count)
 	{
@@ -47,7 +54,8 @@ int	main(int argc, char **argv)
 				&sim.coders[i]) != 0)
 		{
 			stop_simulation(&sim);
-			break ;
+			simulation_destroy(&sim);
+			return (1);
 		}
 		i++;
 	}
