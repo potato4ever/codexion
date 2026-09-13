@@ -1,27 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   time.c                                             :+:      :+:    :+:   */
+/*   print_event.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zabelhac <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/13 17:03:52 by zabelhac          #+#    #+#             */
-/*   Updated: 2026/09/13 17:03:53 by zabelhac         ###   ########.fr       */
+/*   Created: 2026/09/13 19:28:29 by zabelhac          #+#    #+#             */
+/*   Updated: 2026/09/13 19:28:29 by zabelhac         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-long	now_ms(void)
+void	print_event_locked(t_sim *sim, int id, const char *event)
 {
-	struct timeval	now;
+	long	stamp;
 
-	gettimeofday(&now, NULL);
-	return (now.tv_sec * 1000L + now.tv_usec / 1000L);
-}
-
-void	ms_to_timespec(long target_ms, struct timespec *ts)
-{
-	ts->tv_sec = target_ms / 1000L;
-	ts->tv_nsec = (target_ms % 1000L) * 1000000L;
+	stamp = now_ms() - sim->start_ms;
+	pthread_mutex_lock(&sim->print_mutex);
+	printf("%ld %d %s\n", stamp, id, event);
+	pthread_mutex_unlock(&sim->print_mutex);
 }

@@ -1,82 +1,73 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zabelhac <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/13 17:03:33 by zabelhac          #+#    #+#             */
+/*   Updated: 2026/09/13 19:26:03 by zabelhac         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
-static void	stop_simulation(t_sim *sim)
+int	simulation_stopped(t_sim *sim)
 {
+	int	stopped;
+
 	pthread_mutex_lock(&sim->state_mutex);
-	sim->stopped = 1;
-	pthread_cond_broadcast(&sim->event);
+	stopped = sim->stopped;
 	pthread_mutex_unlock(&sim->state_mutex);
+	return (stopped);
 }
 
-static void	start_simulation(t_sim *sim)
+void	run_simulation(t_sim *sim, int count)
+{
+	start_simulation(sim);
+	join_coders(sim, count);
+	pthread_join(sim->monitor, NULL);
+	simulation_destroy(sim);
+}
+
+void	join_coders(t_sim *sim, int count)
+{
+	while (count-- > 0)
+		pthread_join(sim->coders[count].thread, NULL);
+}
+
+int	create_coders(t_sim *sim)
 {
 	int	i;
 
-	pthread_mutex_lock(&sim->state_mutex);
-	sim->start_ms = now_ms();
 	i = 0;
 	while (i < sim->config.count)
 	{
-		sim->coders[i].last_start = sim->start_ms;
+		if (pthread_create(&sim->coders[i].thread, NULL, worker_main,
+				&sim->coders[i]) != 0)
+			return (i);
 		i++;
 	}
-	sim->start_ready = 1;
-	pthread_cond_broadcast(&sim->event);
-	pthread_mutex_unlock(&sim->state_mutex);
+	return (i);
 }
-
 int	main(int argc, char **argv)
 {
 	t_config	config;
 	t_sim		sim;
-	int		i;
+	int			count;
+	int			status;
 
-	if (!parse_config(argc, argv, &config))
-  {
-    fprintf(stderr, "Error: invalid arguments\n");
-		return (1);
-  }
-	if (!simulation_init(&sim, &config))
+	status = init_simulation(argc, argv, &config, &sim);
+	if (status == 0)
+		return (status);
+	count = create_coders(&sim);
+	if (count != config.count
+		|| pthread_create(&sim.monitor, NULL, monitor_main, &sim) != 0)
 	{
-    simulation_destroy(&sim);
-    fprintf(stderr, "Error: initialization failed\n");
-		return (1);
-	}
-	if (config.quota == 0)
-  {
-    simulation_destroy(&sim);
-		return (0);
-  }
-	i = 0;
-	while (i < config.count)
-	{
-		if (pthread_create(&sim.coders[i].thread, NULL, worker_main,
-				&sim.coders[i]) != 0)
-		{
-			stop_simulation(&sim);
-			simulation_destroy(&sim);
-			return (1);
-		}
-		i++;
-	}
-	
-	if (i == config.count && pthread_create(&sim.monitor, NULL,
-			&monitor_main, &sim) == 0)
-	{
-		start_simulation(&sim);
-		while (i-- > 0)
-			pthread_join(sim.coders[i].thread, NULL);
-		pthread_join(sim.monitor, NULL);
-	}
-	else
-	{
-		stop_simulation(&sim);
-		while (i-- > 0)
-			pthread_join(sim.coders[i].thread, NULL);
+		cleanup_thread_error(&sim, count);
 		fprintf(stderr, "Error: thread creation failed\n");
-		simulation_destroy(&sim);
 		return (1);
 	}
-	simulation_destroy(&sim);
+	run_simulation(&sim, count);
 	return (0);
 }

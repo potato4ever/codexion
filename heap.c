@@ -1,30 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heap.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zabelhac <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/13 17:03:29 by zabelhac          #+#    #+#             */
+/*   Updated: 2026/09/13 17:15:30 by zabelhac         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
-
-int	request_before(t_sim *sim, t_request *a, t_request *b)
-{
-	t_coder	*ca;
-	t_coder	*cb;
-
-	ca = &sim->coders[a->coder_id - 1];
-	cb = &sim->coders[b->coder_id - 1];
-
-	if (sim->config.policy == POLICY_EDF
-		&& a->deadline != b->deadline)
-		return (a->deadline < b->deadline);
-	if (sim->config.policy == POLICY_FIFO
-		&& a->sequence != b->sequence)
-    return (a->sequence < b->sequence);
-  return (ca->compiles < cb->compiles);
-}
-
-static void	swap_request(t_request **a, t_request **b)
-{
-	t_request	*temporary;
-
-	temporary = *a;
-	*a = *b;
-	*b = temporary;
-}
 
 int	heap_init(t_heap *heap, int capacity)
 {
@@ -46,54 +32,26 @@ void	heap_destroy(t_heap *heap)
 
 int	heap_push(t_sim *sim, t_heap *heap, t_request *request)
 {
-	int	index;
-
 	if (heap->len == heap->cap)
 		return (0);
-	index = heap->len++;
-	heap->items[index] = request;
-	while (index > 0 && request_before(sim, heap->items[index],
-			heap->items[(index - 1) / 2]))
-	{
-		swap_request(&heap->items[index], &heap->items[(index - 1) / 2]);
-		index = (index - 1) / 2;
-	}
+	heap->items[heap->len] = request;
+	heap->len++;
+	heap_sift_up(sim, heap, heap->len - 1);
 	return (1);
-}
-
-t_request	*heap_peek(t_heap *heap)
-{
-	if (heap->len == 0)
-		return (NULL);
-	return (heap->items[0]);
 }
 
 t_request	*heap_pop(t_sim *sim, t_heap *heap)
 {
 	t_request	*top;
-	int		index;
-	int		child;
 
 	if (heap->len == 0)
 		return (NULL);
 	top = heap->items[0];
 	heap->len--;
-	if (heap->len == 0)
-		return (top);
-	heap->items[0] = heap->items[heap->len];
-	index = 0;
-	while (1)
+	if (heap->len > 0)
 	{
-		child = index * 2 + 1;
-		if (child >= heap->len)
-			break ;
-		if (child + 1 < heap->len && request_before(sim,
-				heap->items[child + 1], heap->items[child]))
-			child++;
-		if (!request_before(sim, heap->items[child], heap->items[index]))
-			break ;
-		swap_request(&heap->items[child], &heap->items[index]);
-		index = child;
+		heap->items[0] = heap->items[heap->len];
+		heap_sift_down(sim, heap, 0);
 	}
 	return (top);
 }
@@ -101,8 +59,6 @@ t_request	*heap_pop(t_sim *sim, t_heap *heap)
 int	heap_remove(t_sim *sim, t_heap *heap, t_request *request)
 {
 	int	index;
-	int	parent;
-	int	child;
 
 	index = 0;
 	while (index < heap->len && heap->items[index] != request)
@@ -113,29 +69,10 @@ int	heap_remove(t_sim *sim, t_heap *heap, t_request *request)
 	if (index == heap->len)
 		return (1);
 	heap->items[index] = heap->items[heap->len];
-	parent = (index - 1) / 2;
-	if (index > 0 && request_before(sim, heap->items[index], heap->items[parent]))
-	{
-		while (index > 0 && request_before(sim, heap->items[index],
-				heap->items[(index - 1) / 2]))
-		{
-			swap_request(&heap->items[index], &heap->items[(index - 1) / 2]);
-			index = (index - 1) / 2;
-		}
-		return (1);
-	}
-	while (1)
-	{
-		child = index * 2 + 1;
-		if (child >= heap->len)
-			break ;
-		if (child + 1 < heap->len && request_before(sim,
-				heap->items[child + 1], heap->items[child]))
-			child++;
-		if (!request_before(sim, heap->items[child], heap->items[index]))
-			break ;
-		swap_request(&heap->items[child], &heap->items[index]);
-		index = child;
-	}
+	if (index > 0 && request_before(sim, heap->items[index],
+			heap->items[(index - 1) / 2]))
+		heap_sift_up(sim, heap, index);
+	else
+		heap_sift_down(sim, heap, index);
 	return (1);
 }
