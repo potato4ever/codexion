@@ -2,9 +2,19 @@
 
 int	request_before(t_sim *sim, t_request *a, t_request *b)
 {
-	if (sim->config.policy == POLICY_EDF && a->deadline != b->deadline)
+	t_coder	*ca;
+	t_coder	*cb;
+
+	ca = &sim->coders[a->coder_id - 1];
+	cb = &sim->coders[b->coder_id - 1];
+
+	if (sim->config.policy == POLICY_EDF
+		&& a->deadline != b->deadline)
 		return (a->deadline < b->deadline);
-  return (a->sequence < b->sequence);
+	if (sim->config.policy == POLICY_FIFO
+		&& a->sequence != b->sequence)
+    return (a->sequence < b->sequence);
+  return (ca->compiles < cb->compiles);
 }
 
 static void	swap_request(t_request **a, t_request **b)

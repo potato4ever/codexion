@@ -125,16 +125,17 @@ void	*worker_main(void *arg)
 {
 	t_coder	*coder;
 	t_sim		*sim;
+	long delay;
 
 	coder = (t_coder *)arg;
 	sim = coder->sim;
+	delay = sim->config.compile_ms + sim->config.cooldown_ms - 10;
 	pthread_mutex_lock(&sim->state_mutex);
 	while (!sim->start_ready && !sim->stopped)
 		pthread_cond_wait(&sim->event, &sim->state_mutex);
 	pthread_mutex_unlock(&sim->state_mutex);
-  if (coder->id % 2 == 0){
-    usleep(2000);
-  }
+	if (coder->id % 2 == 0 && delay > 0)
+		usleep(delay * 1000);
 	while (!simulation_stopped(sim))
 	{
 		pthread_mutex_lock(&sim->state_mutex);
