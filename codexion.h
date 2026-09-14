@@ -106,6 +106,7 @@ int	interruptible_sleep(t_coder *coder, long duration);
 int	finish_compile_at_grant_time(t_coder *coder);
 int	sleep_until(t_coder *coder, long end);
 int	create_coders(t_sim *sim);
+int     all_finished_locked(t_sim *sim);
 void	join_coders(t_sim *sim, int count);
 int	wait_until_event(t_coder *coder);
 long		now_ms(void);
@@ -137,12 +138,15 @@ int	init_dongles(t_sim *sim, int *initialized);
 void	destroy_dongles(t_sim *sim, int count);
 void	cleanup_init_failure(t_sim *sim, int initialized);
 void	monitor_sleep(long remaining);
-void	wait_for_start(t_coder *coder);
+void	wait_for_start(t_sim *sim);
 int	check_monitor(t_sim *sim, long soonest, int victim);
 void	start_simulation(t_sim *sim);
 void	stop_simulation(t_sim *sim);
 int	left_dongle(int id);
 int	right_dongle(t_sim *sim, int id);
 void	release_dongles(t_sim *sim, int left, int right, long now);
+long	find_soonest_cooldown(t_sim *sim);
+void	wait_for_cooldown(t_sim *sim, long soonest);
+void	log_state(t_coder *coder, const char *message);
 
 #endif

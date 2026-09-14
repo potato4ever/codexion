@@ -12,18 +12,23 @@
 
 #include "codexion.h"
 
-static void	log_state(t_coder *coder, const char *message)
+
+static void	wait_for_start_coder(t_coder *coder)
 {
 	t_sim	*sim;
+	long	delay;
 
 	sim = coder->sim;
+	delay = sim->config.compile_ms + sim->config.cooldown_ms - 10;
 	pthread_mutex_lock(&sim->state_mutex);
-	if (!sim->stopped)
-		print_event_locked(sim, coder->id, message);
+	while (!sim->start_ready && !sim->stopped)
+		pthread_cond_wait(&sim->event, &sim->state_mutex);
 	pthread_mutex_unlock(&sim->state_mutex);
+	if (coder->id % 2 == 0 && delay > 0)
+		usleep((useconds_t)delay * 1000);
 }
 
-static long	find_soonest_cooldown(t_sim *sim)
+long	find_soonest_cooldown(t_sim *sim)
 {
 	long	soonest;
 	long	now;
@@ -44,7 +49,7 @@ static long	find_soonest_cooldown(t_sim *sim)
 	return (soonest);
 }
 
-static void	wait_for_cooldown(t_sim *sim, long soonest)
+void	wait_for_cooldown(t_sim *sim, long soonest)
 {
 	long	remaining;
 
@@ -67,7 +72,7 @@ void	*worker_main(void *arg)
 
 	coder = (t_coder *)arg;
 	sim = coder->sim;
-	wait_for_start(coder);
+	wait_for_start_coder(coder);
 	while (!simulation_stopped(sim))
 	{
 		if (!run_cycle(coder))

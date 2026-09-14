@@ -12,19 +12,15 @@
 
 #include "codexion.h"
 
-void	wait_for_start(t_coder *coder)
+void	log_state(t_coder *coder, const char *message)
 {
 	t_sim	*sim;
-	long	delay;
 
 	sim = coder->sim;
-	delay = sim->config.compile_ms + sim->config.cooldown_ms - 10;
 	pthread_mutex_lock(&sim->state_mutex);
-	while (!sim->start_ready && !sim->stopped)
-		pthread_cond_wait(&sim->event, &sim->state_mutex);
+	if (!sim->stopped)
+		print_event_locked(sim, coder->id, message);
 	pthread_mutex_unlock(&sim->state_mutex);
-	if (coder->id % 2 == 0 && delay > 0)
-		usleep((useconds_t)delay * 1000);
 }
 
 int	run_cycle(t_coder *coder)

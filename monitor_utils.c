@@ -12,6 +12,20 @@
 
 #include "codexion.h"
 
+int	all_finished_locked(t_sim *sim)
+{
+	int	i;
+
+	i = 0;
+	while (i < sim->config.count)
+	{
+		if (sim->coders[i].compiles < sim->config.quota)
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 int	check_monitor(t_sim *sim, long soonest, int victim)
 {
 	if (all_finished_locked(sim))
@@ -29,14 +43,6 @@ int	check_monitor(t_sim *sim, long soonest, int victim)
 		return (1);
 	}
 	return (0);
-}
-
-void	wait_for_start(t_sim *sim)
-{
-	pthread_mutex_lock(&sim->state_mutex);
-	while (!sim->start_ready && !sim->stopped)
-		pthread_cond_wait(&sim->event, &sim->state_mutex);
-	pthread_mutex_unlock(&sim->state_mutex);
 }
 
 void	monitor_sleep(long remaining)
