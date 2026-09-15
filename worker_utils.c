@@ -17,10 +17,8 @@ void	log_state(t_coder *coder, const char *message)
 	t_sim	*sim;
 
 	sim = coder->sim;
-	pthread_mutex_lock(&sim->state_mutex);
 	if (!sim->stopped)
 		print_event_locked(sim, coder->id, message);
-	pthread_mutex_unlock(&sim->state_mutex);
 }
 
 int	run_cycle(t_coder *coder)
@@ -36,17 +34,23 @@ int	run_cycle(t_coder *coder)
 		return (0);
 	}
 	pthread_mutex_unlock(&sim->state_mutex);
+	pthread_mutex_lock(&sim->state_mutex);
 	log_state(coder, "has taken a dongle");
 	log_state(coder, "has taken a dongle");
 	log_state(coder, "is compiling");
+	pthread_mutex_unlock(&sim->state_mutex);
 	if (!finish_compile_at_grant_time(coder))
 		return (0);
 	if (!finish_compile(coder))
 		return (0);
+	pthread_mutex_lock(&sim->state_mutex);
 	log_state(coder, "is debugging");
+	pthread_mutex_unlock(&sim->state_mutex);
 	if (!interruptible_sleep(coder, sim->config.debug_ms))
 		return (0);
+	pthread_mutex_lock(&sim->state_mutex);
 	log_state(coder, "is refactoring");
+	pthread_mutex_unlock(&sim->state_mutex);
 	if (!interruptible_sleep(coder, sim->config.refactor_ms))
 		return (0);
 	return (1);
