@@ -42,4 +42,6 @@ should i handle spaces like atoi "+1    1 1 " = 1 ?
 should replace the config names
 why removing struct s_sim from line 54 not gonna change anything
 solve norminette and add headers
+/2 on odd and even
+to much wait on sleep when it burnout 
 

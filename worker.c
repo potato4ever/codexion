@@ -19,7 +19,7 @@ static void	wait_for_start_coder(t_coder *coder)
 	long	delay;
 
 	sim = coder->sim;
-	delay = sim->config.compile_ms + sim->config.cooldown_ms - 10;
+	delay = (sim->config.compile_ms + sim->config.cooldown_ms) / 2;
 	pthread_mutex_lock(&sim->state_mutex);
 	while (!sim->start_ready && !sim->stopped)
 		pthread_cond_wait(&sim->event, &sim->state_mutex);
