@@ -45,3 +45,25 @@ solve norminette and add headers
 /2 on odd and even
 to much wait on sleep when it burnout 
 
+
+
+
+
+what the difference between usleep and cond_wait
+what is thread
+what the difference between it and process
+how these works and what they takes:
+  pthread_create()
+  pthread_mutex*()
+  pthread_cond*()
+  gettimeofday()
+  timeval
+#define for (safety reasons)
+should i care about something like overflow like in this line 
+- (coder->request.deadline = coder->last_start + sim->config.die_ms;)
+deadline is long it can overflow at a specific point through multiple ways like giving it int max and an int max in number of compile there is a potential
+why we lock dongles like here we are just reading it 
+- (ready = (!first->busy && !second->busy && first->cooldown_until <= now
+			&& second->cooldown_until <= now);)
+asumption: busy is main reason cuz it variable i assume that cooldown is not cuz if it 60 it gonna be always 60 but if it change and that what it look like then it also a reason to use mutex
+is the order of unlocking dongles matter

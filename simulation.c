@@ -79,7 +79,6 @@ void	try_schedule_locked(t_sim *sim)
 			break ;
 		grant_pair_locked(sim, winner, now);
 	}
-	pthread_cond_broadcast(&sim->event);
 }
 
 void	request_pair_locked(t_coder *coder)
@@ -122,6 +121,5 @@ void	release_pair_locked(t_coder *coder)
 	now = now_ms();
 	release_dongles(sim, left, right, now);
 	coder->request.owns_pair = 0;
-	pthread_cond_broadcast(&sim->event);
 	try_schedule_locked(sim);
 }
