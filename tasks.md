@@ -44,6 +44,7 @@ why removing struct s_sim from line 54 not gonna change anything
 solve norminette and add headers
 /2 on odd and even
 to much wait on sleep when it burnout 
+is the burnout time is it consistent with is compiling state
 
 
 
