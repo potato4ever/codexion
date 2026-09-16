@@ -21,6 +21,18 @@ void	log_state(t_coder *coder, const char *message)
 		print_event_locked(sim, coder->id, message);
 }
 
+static void	log_compile_start(t_coder *coder)
+{
+	t_sim	*sim;
+
+	sim = coder->sim;
+	pthread_mutex_lock(&sim->state_mutex);
+	log_state(coder, "has taken a dongle");
+	log_state(coder, "has taken a dongle");
+	log_state(coder, "is compiling");
+	pthread_mutex_unlock(&sim->state_mutex);
+}
+
 int	run_cycle(t_coder *coder)
 {
 	t_sim	*sim;
@@ -34,11 +46,7 @@ int	run_cycle(t_coder *coder)
 		return (0);
 	}
 	pthread_mutex_unlock(&sim->state_mutex);
-	pthread_mutex_lock(&sim->state_mutex);
-	log_state(coder, "has taken a dongle");
-	log_state(coder, "has taken a dongle");
-	log_state(coder, "is compiling");
-	pthread_mutex_unlock(&sim->state_mutex);
+	log_compile_start(coder);
 	if (!finish_compile_at_grant_time(coder))
 		return (0);
 	if (!finish_compile(coder))

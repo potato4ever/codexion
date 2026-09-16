@@ -51,9 +51,13 @@ static void	set_config(t_config *config, long *values, char *policy)
 
 static int	validate_values(long *values)
 {
-	if (values[0] < 1 || values[0] > INT_MAX || values[1] < 1
-		|| values[2] < 1 || values[3] < 0 || values[4] < 0
-		|| values[5] < 0 || values[6] < 0)
+	if (values[0] < 1 || values[0] > INT_MAX 
+    || values[1] < 1 || values[1] > INT_MAX 
+    || values[2] < 0 || values[2] > INT_MAX 
+    || values[3] < 0 || values[3] > INT_MAX 
+    || values[4] < 0 || values[4] > INT_MAX
+		|| values[5] < 0 || values[5] > INT_MAX 
+    || values[6] < 0 || values[6] > INT_MAX)
 		return (0);
 	return (1);
 }
