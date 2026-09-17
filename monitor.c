@@ -6,12 +6,11 @@
 /*   By: zabelhac <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 17:03:38 by zabelhac          #+#    #+#             */
-/*   Updated: 2026/09/13 17:03:39 by zabelhac         ###   ########.fr       */
+/*   Updated: 2026/09/17 14:53:41 by zabelhac         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
 
 void	wait_for_start(t_sim *sim)
 {

@@ -12,7 +12,6 @@
 
 #include "codexion.h"
 
-
 void	stop_simulation(t_sim *sim)
 {
 	pthread_mutex_lock(&sim->state_mutex);

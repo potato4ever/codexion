@@ -33,6 +33,16 @@ static void	log_compile_start(t_coder *coder)
 	pthread_mutex_unlock(&sim->state_mutex);
 }
 
+static void	log_action(t_coder *coder, const char *message)
+{
+	t_sim	*sim;
+
+	sim = coder->sim;
+	pthread_mutex_lock(&sim->state_mutex);
+	log_state(coder, message);
+	pthread_mutex_unlock(&sim->state_mutex);
+}
+
 int	run_cycle(t_coder *coder)
 {
 	t_sim	*sim;
@@ -51,14 +61,10 @@ int	run_cycle(t_coder *coder)
 		return (0);
 	if (!finish_compile(coder))
 		return (0);
-	pthread_mutex_lock(&sim->state_mutex);
-	log_state(coder, "is debugging");
-	pthread_mutex_unlock(&sim->state_mutex);
+	log_action(coder, "is debugging");
 	if (!interruptible_sleep(coder, sim->config.time_to_debug))
 		return (0);
-	pthread_mutex_lock(&sim->state_mutex);
-	log_state(coder, "is refactoring");
-	pthread_mutex_unlock(&sim->state_mutex);
+	log_action(coder, "is refactoring");
 	if (!interruptible_sleep(coder, sim->config.time_to_refactor))
 		return (0);
 	return (1);

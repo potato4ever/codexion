@@ -74,3 +74,10 @@ when create thread and send them to a function is all of them
 use the same function or each of them has it's own copy 
 + in code a assume that t_coder *coder is different
 from the other threads coder cuz i send the address of t_coder not the pointer 
+
+
+tasks now:
+remove timespec function
+heap.pop if you didin't use it 
+remove broadcast of there is still one's that coder's use
+check for unused headers

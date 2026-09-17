@@ -50,6 +50,7 @@ int	create_coders(t_sim *sim)
 	}
 	return (i);
 }
+
 int	main(int argc, char **argv)
 {
 	t_config	config;

@@ -62,24 +62,3 @@ t_request	*heap_pop(t_sim *sim, t_heap *heap)
 	}
 	return (top);
 }
-
-int	heap_remove(t_sim *sim, t_heap *heap, t_request *request)
-{
-	int	index;
-
-	index = 0;
-	while (index < heap->len && heap->items[index] != request)
-		index++;
-	if (index == heap->len)
-		return (0);
-	heap->len--;
-	if (index == heap->len)
-		return (1);
-	heap->items[index] = heap->items[heap->len];
-	if (index > 0 && request_before(sim, heap->items[index],
-			heap->items[(index - 1) / 2]))
-		heap_sift_up(sim, heap, index);
-	else
-		heap_sift_down(sim, heap, index);
-	return (1);
-}

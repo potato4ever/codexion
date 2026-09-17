@@ -6,7 +6,7 @@
 /*   By: zabelhac <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 17:03:14 by zabelhac          #+#    #+#             */
-/*   Updated: 2026/09/13 20:19:09 by zabelhac         ###   ########.fr       */
+/*   Updated: 2026/09/17 14:56:41 by zabelhac         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,32 +94,39 @@ typedef struct s_sim
 }	t_sim;
 
 int			parse_config(int argc, char **argv, t_config *config);
-int	    run_cycle(t_coder *coder);
+int			check_monitor(t_sim *sim, long soonest, int victim);
+int			init_dongles(t_sim *sim, int *initialized);
+int			left_dongle(int id);
+int			right_dongle(t_sim *sim, int id);
+int			run_cycle(t_coder *coder);
 int			simulation_stopped(t_sim *sim);
 int			heap_init(t_heap *heap, int capacity);
 int			heap_push(t_sim *sim, t_heap *heap, t_request *request);
 int			heap_remove(t_sim *sim, t_heap *heap, t_request *request);
 int			request_before(t_sim *sim, t_request *a, t_request *b);
 int			simulation_init(t_sim *sim, t_config *config);
-int     finish_compile(t_coder *coder);
-int	interruptible_sleep(t_coder *coder, long duration);
-int	finish_compile_at_grant_time(t_coder *coder);
-int	sleep_until(t_coder *coder, long end);
-int	create_coders(t_sim *sim);
-int     all_finished_locked(t_sim *sim);
-int	try_acquire_self_locked(t_coder *coder);
-void	join_coders(t_sim *sim, int count);
-int	wait_until_event(t_coder *coder);
+int			finish_compile(t_coder *coder);
+int			interruptible_sleep(t_coder *coder, long duration);
+int			finish_compile_at_grant_time(t_coder *coder);
+int			sleep_until(t_coder *coder, long end);
+int			create_coders(t_sim *sim);
+int			all_finished_locked(t_sim *sim);
+int			try_acquire_self_locked(t_coder *coder);
+int			init_memory(t_sim *sim, t_config *config);
+int			init_global_mutexes(t_sim *sim);
+int			wait_until_event(t_coder *coder);
+int			init_simulation(int argc, char **argv, t_config *config,
+				t_sim *sim);
 long		now_ms(void);
-void	cleanup_thread_error(t_sim *sim, int count);
-int	init_simulation(int argc, char **argv, t_config *config, t_sim *sim);
 void		ms_to_timespec(long target_ms, struct timespec *ts);
-void	run_simulation(t_sim *sim, int count);
+void		join_coders(t_sim *sim, int count);
+void		cleanup_thread_error(t_sim *sim, int count);
+void		run_simulation(t_sim *sim, int count);
 void		heap_destroy(t_heap *heap);
-void	unlock_pair(t_sim *sim, int left, int right);
-void	lock_pair(t_sim *sim, int left, int right);
-void	unlock_dongle(t_dongle *dongle);
-void	lock_dongle(t_dongle *dongle);
+void		unlock_pair(t_sim *sim, int left, int right);
+void		lock_pair(t_sim *sim, int left, int right);
+void		unlock_dongle(t_dongle *dongle);
+void		lock_dongle(t_dongle *dongle);
 t_request	*heap_peek(t_heap *heap);
 t_request	*heap_pop(t_sim *sim, t_heap *heap);
 void		simulation_destroy(t_sim *sim);
@@ -131,22 +138,16 @@ void		*monitor_main(void *arg);
 void		swap_request(t_request **a, t_request **b);
 void		heap_sift_up(t_sim *sim, t_heap *heap, int index);
 void		heap_sift_down(t_sim *sim, t_heap *heap, int index);
-void	init_coders(t_sim *sim);
-int	init_memory(t_sim *sim, t_config *config);
-int	init_global_mutexes(t_sim *sim);
-int	init_dongles(t_sim *sim, int *initialized);
-void	destroy_dongles(t_sim *sim, int count);
-void	cleanup_init_failure(t_sim *sim, int initialized);
-void	monitor_sleep(long remaining);
-void	wait_for_start(t_sim *sim);
-int	check_monitor(t_sim *sim, long soonest, int victim);
-void	start_simulation(t_sim *sim);
-void	stop_simulation(t_sim *sim);
-int	left_dongle(int id);
-int	right_dongle(t_sim *sim, int id);
-void	release_dongles(t_sim *sim, int left, int right, long now);
-long	find_soonest_cooldown(t_sim *sim);
-void	wait_for_cooldown(t_sim *sim, long soonest);
-void	log_state(t_coder *coder, const char *message);
+void		init_coders(t_sim *sim);
+void		destroy_dongles(t_sim *sim, int count);
+void		cleanup_init_failure(t_sim *sim, int initialized);
+void		monitor_sleep(long remaining);
+void		wait_for_start(t_sim *sim);
+void		start_simulation(t_sim *sim);
+void		stop_simulation(t_sim *sim);
+void		release_dongles(t_sim *sim, int left, int right, long now);
+long		find_soonest_cooldown(t_sim *sim);
+void		wait_for_cooldown(t_sim *sim, long soonest);
+void		log_state(t_coder *coder, const char *message);
 
 #endif

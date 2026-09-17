@@ -12,7 +12,6 @@
 
 #include "codexion.h"
 
-
 static int	self_ready_locked(t_coder *coder, long now,
 		t_dongle *first, t_dongle *second)
 {
