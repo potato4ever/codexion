@@ -41,7 +41,7 @@ int	create_coders(t_sim *sim)
 	int	i;
 
 	i = 0;
-	while (i < sim->config.count)
+	while (i < sim->config.number_of_coders)
 	{
 		if (pthread_create(&sim->coders[i].thread, NULL, worker_main,
 				&sim->coders[i]) != 0)
@@ -61,7 +61,7 @@ int	main(int argc, char **argv)
 	if (status == 0)
 		return (status);
 	count = create_coders(&sim);
-	if (count != config.count
+	if (count != config.number_of_coders
 		|| pthread_create(&sim.monitor, NULL, monitor_main, &sim) != 0)
 	{
 		cleanup_thread_error(&sim, count);

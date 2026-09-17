@@ -19,10 +19,10 @@ int	request_before(t_sim *sim, t_request *a, t_request *b)
 
 	ca = &sim->coders[a->coder_id - 1];
 	cb = &sim->coders[b->coder_id - 1];
-	if (sim->config.policy == POLICY_EDF
+	if (sim->config.scheduler == POLICY_EDF
 		&& a->deadline != b->deadline)
 		return (a->deadline < b->deadline);
-	if (sim->config.policy == POLICY_FIFO
+	if (sim->config.scheduler == POLICY_FIFO
 		&& a->sequence != b->sequence)
 		return (a->sequence < b->sequence);
 	return (ca->compiles < cb->compiles);

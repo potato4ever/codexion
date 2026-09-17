@@ -29,14 +29,14 @@ typedef enum e_policy
 
 typedef struct s_config
 {
-	int			count;
-	long		die_ms;
-	long		compile_ms;
-	long		debug_ms;
-	long		refactor_ms;
-	long		quota;
-	long		cooldown_ms;
-	t_policy	policy;
+	int			number_of_coders;
+	long		time_to_burnout;
+	long		time_to_compile;
+	long		time_to_debug;
+	long		time_to_refactor;
+	long		number_of_compiles_required;
+	long		dongle_cooldown;
+	t_policy	scheduler;
 }	t_config;
 
 typedef struct s_request
@@ -107,6 +107,7 @@ int	finish_compile_at_grant_time(t_coder *coder);
 int	sleep_until(t_coder *coder, long end);
 int	create_coders(t_sim *sim);
 int     all_finished_locked(t_sim *sim);
+int	try_acquire_self_locked(t_coder *coder);
 void	join_coders(t_sim *sim, int count);
 int	wait_until_event(t_coder *coder);
 long		now_ms(void);
@@ -124,7 +125,6 @@ t_request	*heap_pop(t_sim *sim, t_heap *heap);
 void		simulation_destroy(t_sim *sim);
 void		print_event_locked(t_sim *sim, int id, const char *event);
 void		request_pair_locked(t_coder *coder);
-void		try_schedule_locked(t_sim *sim);
 void		release_pair_locked(t_coder *coder);
 void		*worker_main(void *arg);
 void		*monitor_main(void *arg);

@@ -20,8 +20,7 @@ int	wait_until_event(t_coder *coder)
 	sim = coder->sim;
 	while (!sim->stopped && !coder->request.owns_pair)
 	{
-		try_schedule_locked(sim);
-		if (coder->request.owns_pair)
+		if (try_acquire_self_locked(coder))
 			break ;
 		soonest = find_soonest_cooldown(sim);
 		wait_for_cooldown(sim, soonest);
@@ -33,14 +32,19 @@ int	sleep_until(t_coder *coder, long end)
 {
 	t_sim	*sim;
 	long	remaining;
-	int		finished;
 
 	sim = coder->sim;
-	remaining = end - now_ms();
-	if (remaining > 0)
-		usleep((useconds_t)remaining * 1000);
-	finished = (!simulation_stopped(sim) && now_ms() >= end);
-	return (finished);
+	while (!simulation_stopped(sim))
+	{
+		remaining = end - now_ms();
+		if (remaining <= 0)
+			break ;
+		if (remaining > 1)
+			usleep(1000);
+		else
+			usleep((useconds_t)remaining * 1000);
+	}
+	return (!simulation_stopped(sim) && now_ms() >= end);
 }
 
 int	interruptible_sleep(t_coder *coder, long duration)
@@ -53,7 +57,7 @@ int	finish_compile_at_grant_time(t_coder *coder)
 	long	end;
 
 	pthread_mutex_lock(&coder->sim->state_mutex);
-	end = coder->last_start + coder->sim->config.compile_ms;
+	end = coder->last_start + coder->sim->config.time_to_compile;
 	pthread_mutex_unlock(&coder->sim->state_mutex);
 	if (!sleep_until(coder, end))
 		return (0);

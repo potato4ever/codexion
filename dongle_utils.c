@@ -24,6 +24,11 @@ void	unlock_dongle(t_dongle *dongle)
 
 void	lock_pair(t_sim *sim, int left, int right)
 {
+	if (left == right)
+	{
+		lock_dongle(&sim->dongles[left]);
+		return ;
+	}
 	if (left < right)
 	{
 		lock_dongle(&sim->dongles[left]);
@@ -38,6 +43,11 @@ void	lock_pair(t_sim *sim, int left, int right)
 
 void	unlock_pair(t_sim *sim, int left, int right)
 {
+	if (left == right)
+	{
+		unlock_dongle(&sim->dongles[left]);
+		return ;
+	}
 	if (left < right)
 	{
 		unlock_dongle(&sim->dongles[right]);

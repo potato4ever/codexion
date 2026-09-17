@@ -28,7 +28,7 @@ void	start_simulation(t_sim *sim)
 	pthread_mutex_lock(&sim->state_mutex);
 	sim->start_ms = now_ms();
 	i = 0;
-	while (i < sim->config.count)
+	while (i < sim->config.number_of_coders)
 	{
 		sim->coders[i].last_start = sim->start_ms;
 		i++;
@@ -57,7 +57,7 @@ int	init_simulation(int argc, char **argv, t_config *config, t_sim *sim)
 		fprintf(stderr, "Error: initialization failed\n");
 		return (0);
 	}
-	if (config->quota == 0)
+	if (config->number_of_compiles_required == 0)
 	{
 		simulation_destroy(sim);
 		return (0);

@@ -37,16 +37,16 @@ static int	parse_number(const char *text, long *value)
 
 static void	set_config(t_config *config, long *values, char *policy)
 {
-	config->count = (int)values[0];
-	config->die_ms = values[1];
-	config->compile_ms = values[2];
-	config->debug_ms = values[3];
-	config->refactor_ms = values[4];
-	config->quota = values[5];
-	config->cooldown_ms = values[6];
-	config->policy = POLICY_FIFO;
+	config->number_of_coders = (int)values[0];
+	config->time_to_burnout = values[1];
+	config->time_to_compile = values[2];
+	config->time_to_debug = values[3];
+	config->time_to_refactor = values[4];
+	config->number_of_compiles_required = values[5];
+	config->dongle_cooldown = values[6];
+	config->scheduler = POLICY_FIFO;
 	if (!strcmp(policy, "edf"))
-		config->policy = POLICY_EDF;
+		config->scheduler = POLICY_EDF;
 }
 
 static int	validate_values(long *values)

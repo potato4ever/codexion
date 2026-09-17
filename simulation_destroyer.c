@@ -37,7 +37,7 @@ void	cleanup_init_failure(t_sim *sim, int initialized)
 
 void	simulation_destroy(t_sim *sim)
 {
-	destroy_dongles(sim, sim->config.count);
+	destroy_dongles(sim, sim->config.number_of_coders);
 	pthread_cond_destroy(&sim->event);
 	pthread_mutex_destroy(&sim->print_mutex);
 	pthread_mutex_destroy(&sim->state_mutex);

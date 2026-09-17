@@ -17,11 +17,11 @@ int	init_dongles(t_sim *sim, int *initialized)
 	int	i;
 
 	i = 0;
-	while (i < sim->config.count)
+	while (i < sim->config.number_of_coders)
 	{
 		if (pthread_mutex_init(&sim->dongles[i].mutex, NULL) != 0)
 			break ;
-		if (!heap_init(&sim->dongles[i].queue, sim->config.count))
+		if (!heap_init(&sim->dongles[i].queue, sim->config.number_of_coders))
 		{
 			i++;
 			break ;
@@ -29,7 +29,7 @@ int	init_dongles(t_sim *sim, int *initialized)
 		i++;
 	}
 	*initialized = i;
-	return (i == sim->config.count);
+	return (i == sim->config.number_of_coders);
 }
 
 int	init_global_mutexes(t_sim *sim)
@@ -53,20 +53,20 @@ int	init_global_mutexes(t_sim *sim)
 int	init_memory(t_sim *sim, t_config *config)
 {
 	sim->dongles = malloc(sizeof(*sim->dongles)
-			* (size_t)config->count);
+			* (size_t)config->number_of_coders);
 	if (!sim->dongles)
 		return (0);
 	memset(sim->dongles, 0, sizeof(*sim->dongles)
-		* (size_t)config->count);
+		* (size_t)config->number_of_coders);
 	sim->coders = malloc(sizeof(*sim->coders)
-			* (size_t)config->count);
+			* (size_t)config->number_of_coders);
 	if (!sim->coders)
 	{
 		free(sim->dongles);
 		return (0);
 	}
 	memset(sim->coders, 0, sizeof(*sim->coders)
-		* (size_t)config->count);
+		* (size_t)config->number_of_coders);
 	return (1);
 }
 
@@ -75,7 +75,7 @@ void	init_coders(t_sim *sim)
 	int	i;
 
 	i = 0;
-	while (i < sim->config.count)
+	while (i < sim->config.number_of_coders)
 	{
 		sim->coders[i].id = i + 1;
 		sim->coders[i].sim = sim;

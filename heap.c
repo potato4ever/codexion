@@ -40,6 +40,13 @@ int	heap_push(t_sim *sim, t_heap *heap, t_request *request)
 	return (1);
 }
 
+t_request	*heap_peek(t_heap *heap)
+{
+	if (heap->len == 0)
+		return (NULL);
+	return (heap->items[0]);
+}
+
 t_request	*heap_pop(t_sim *sim, t_heap *heap)
 {
 	t_request	*top;

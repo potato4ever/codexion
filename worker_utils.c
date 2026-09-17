@@ -54,12 +54,12 @@ int	run_cycle(t_coder *coder)
 	pthread_mutex_lock(&sim->state_mutex);
 	log_state(coder, "is debugging");
 	pthread_mutex_unlock(&sim->state_mutex);
-	if (!interruptible_sleep(coder, sim->config.debug_ms))
+	if (!interruptible_sleep(coder, sim->config.time_to_debug))
 		return (0);
 	pthread_mutex_lock(&sim->state_mutex);
 	log_state(coder, "is refactoring");
 	pthread_mutex_unlock(&sim->state_mutex);
-	if (!interruptible_sleep(coder, sim->config.refactor_ms))
+	if (!interruptible_sleep(coder, sim->config.time_to_refactor))
 		return (0);
 	return (1);
 }

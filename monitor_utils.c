@@ -17,9 +17,9 @@ int	all_finished_locked(t_sim *sim)
 	int	i;
 
 	i = 0;
-	while (i < sim->config.count)
+	while (i < sim->config.number_of_coders)
 	{
-		if (sim->coders[i].compiles < sim->config.quota)
+		if (sim->coders[i].compiles < sim->config.number_of_compiles_required)
 			return (0);
 		i++;
 	}

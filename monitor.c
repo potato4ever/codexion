@@ -28,11 +28,11 @@ static long	find_soonest(t_sim *sim, int *victim)
 
 	soonest = LONG_MAX;
 	i = 0;
-	while (i < sim->config.count)
+	while (i < sim->config.number_of_coders)
 	{
-		if (sim->coders[i].last_start + sim->config.die_ms < soonest)
+		if (sim->coders[i].last_start + sim->config.time_to_burnout < soonest)
 		{
-			soonest = sim->coders[i].last_start + sim->config.die_ms;
+			soonest = sim->coders[i].last_start + sim->config.time_to_burnout;
 			*victim = i;
 		}
 		i++;
