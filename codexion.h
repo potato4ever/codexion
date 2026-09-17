@@ -102,7 +102,6 @@ int			run_cycle(t_coder *coder);
 int			simulation_stopped(t_sim *sim);
 int			heap_init(t_heap *heap, int capacity);
 int			heap_push(t_sim *sim, t_heap *heap, t_request *request);
-int			heap_remove(t_sim *sim, t_heap *heap, t_request *request);
 int			request_before(t_sim *sim, t_request *a, t_request *b);
 int			simulation_init(t_sim *sim, t_config *config);
 int			finish_compile(t_coder *coder);
@@ -118,7 +117,6 @@ int			wait_until_event(t_coder *coder);
 int			init_simulation(int argc, char **argv, t_config *config,
 				t_sim *sim);
 long		now_ms(void);
-void		ms_to_timespec(long target_ms, struct timespec *ts);
 void		join_coders(t_sim *sim, int count);
 void		cleanup_thread_error(t_sim *sim, int count);
 void		run_simulation(t_sim *sim, int count);
