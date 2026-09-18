@@ -23,6 +23,8 @@ static int	parse_number(const char *text, long *value)
 		text++;
 	if (*text == '+')
 		text++;
+  if (!*text)
+    return (0);
 	while (*text)
 	{
 		if ((*text < '0') || (*text > '9')
