@@ -1,3 +1,26 @@
+# NOW:
+reread the project 
+the subject and the correction sheet
+check the norminette and leaks
+look for someone to check your project with u
+broadcast & signal & timeval & gettimeofday
+somewhere else it gonna make a recursion if i did this like the thread function call another function that call the first function for it's return 
+and then you create a recursion
+where the threads goes when the mutex is locked
+what is the null on those 
+what is process
+what's the difference between thread and proced
+coffman conditions 
+enum
+
+
+
+
+
+
+
+
+
 what shared between threads 
 what the difference between process and thread
 what is a mutexes
@@ -56,11 +79,6 @@ what the difference between usleep and cond_wait
 what is thread
 what the difference between it and process
 how these works and what they takes:
-  pthread_create()
-  pthread_mutex*()
-  pthread_cond*()
-  gettimeofday()
-  timeval
 #define for (safety reasons)
 should i care about something like overflow like in this line 
 - (coder->request.deadline = coder->last_start + sim->config.die_ms;)
@@ -78,6 +96,7 @@ from the other threads coder cuz i send the address of t_coder not the pointer
 
 tasks now:
 remove timespec function
-heap.pop if you didin't use it 
+heap.remove if you didin't use it 
 remove broadcast of there is still one's that coder's use
 check for unused headers
+handle " "
