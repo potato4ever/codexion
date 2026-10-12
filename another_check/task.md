@@ -1,0 +1,10 @@
+- coffman conditions
+- -W -W -W -pthread what's each one of them
+- pthread_t, mutex_t, cond_t
+- pthread_mutex/create/cond/join
+- gettimeofday/ struct timeval
+- heap how it works/ time complexity/ queue vs heap?
+- what's data race, race condition?
+- what's a mutex/ cond
+- NULL in the functions
+- what's a conditional variable

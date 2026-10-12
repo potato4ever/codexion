@@ -1,3 +1,5 @@
+# for recode
+
 # NOW:
 reread the project 
 the subject and the correction sheet
@@ -100,3 +102,4 @@ heap.remove if you didin't use it
 remove broadcast of there is still one's that coder's use
 check for unused headers
 handle " "
+
