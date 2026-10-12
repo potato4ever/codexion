@@ -1,0 +1,71 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   worker_utils.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zabelhac <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/13 19:55:36 by zabelhac          #+#    #+#             */
+/*   Updated: 2026/09/13 19:55:37 by zabelhac         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "codexion.h"
+
+void	log_state(t_coder *coder, const char *message)
+{
+	t_sim	*sim;
+
+	sim = coder->sim;
+	if (!sim->stopped)
+		print_event_locked(sim, coder->id, message);
+}
+
+static void	log_compile_start(t_coder *coder)
+{
+	t_sim	*sim;
+
+	sim = coder->sim;
+	pthread_mutex_lock(&sim->state_mutex);
+	log_state(coder, "has taken a dongle");
+	log_state(coder, "has taken a dongle");
+	log_state(coder, "is compiling");
+	pthread_mutex_unlock(&sim->state_mutex);
+}
+
+static void	log_action(t_coder *coder, const char *message)
+{
+	t_sim	*sim;
+
+	sim = coder->sim;
+	pthread_mutex_lock(&sim->state_mutex);
+	log_state(coder, message);
+	pthread_mutex_unlock(&sim->state_mutex);
+}
+
+int	run_cycle(t_coder *coder)
+{
+	t_sim	*sim;
+
+	sim = coder->sim;
+	pthread_mutex_lock(&sim->state_mutex);
+	request_pair_locked(coder);
+	if (!wait_until_event(coder))
+	{
+		pthread_mutex_unlock(&sim->state_mutex);
+		return (0);
+	}
+	pthread_mutex_unlock(&sim->state_mutex);
+	log_compile_start(coder);
+	if (!finish_compile_at_grant_time(coder))
+		return (0);
+	if (!finish_compile(coder))
+		return (0);
+	log_action(coder, "is debugging");
+	if (!interruptible_sleep(coder, sim->config.time_to_debug))
+		return (0);
+	log_action(coder, "is refactoring");
+	if (!interruptible_sleep(coder, sim->config.time_to_refactor))
+		return (0);
+	return (1);
+}
